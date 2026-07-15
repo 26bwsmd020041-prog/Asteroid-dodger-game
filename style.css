@@ -1,0 +1,72 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+}
+
+#game{
+    position:relative;
+    width:100vw;
+    max-width:900px;
+    height:100vh;
+    background:linear-gradient(#020214,#090927);
+    overflow:hidden;
+    border:2px solid white;
+    touch-action:none;
+}
+
+#player{
+    position:absolute;
+    left:60px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:50px;
+    user-select:none;
+}
+
+.asteroid{
+    position:absolute;
+    font-size:45px;
+}
+
+#score{
+    position:absolute;
+    top:10px;
+    left:10px;
+    color:white;
+    font-size:26px;
+}
+
+#gameOver{
+    position:absolute;
+    inset:0;
+    display:none;
+    background:rgba(0,0,0,.85);
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+}
+
+#gameOver h1{
+    color:white;
+    font-size:50px;
+    margin-bottom:20px;
+}
+
+#restartBtn{
+    padding:15px 35px;
+    font-size:22px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}
