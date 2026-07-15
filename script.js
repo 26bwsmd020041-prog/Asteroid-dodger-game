@@ -4,135 +4,160 @@ const scoreText = document.getElementById("score");
 const gameOver = document.getElementById("gameOver");
 const restartBtn = document.getElementById("restartBtn");
 
-let playerY = window.innerHeight / 2;
+let playerY = 250;
 let score = 0;
 let running = true;
 
 const keys = {};
 let asteroids = [];
 
-document.addEventListener("keydown", e=>{
-    keys[e.key]=true;
+let asteroidSpeed = 4;
+let spawnRate = 900;
+let spawnTimer;
+
+// Keyboard controls
+document.addEventListener("keydown", e => {
+    keys[e.key] = true;
 });
 
-document.addEventListener("keyup", e=>{
-    keys[e.key]=false;
+document.addEventListener("keyup", e => {
+    keys[e.key] = false;
 });
 
-// Mobile drag controls
-game.addEventListener("touchmove",(e)=>{
-    if(!running) return;
+// Touch controls
+game.addEventListener("touchmove", e => {
+    if (!running) return;
 
     e.preventDefault();
 
-    const rect=game.getBoundingClientRect();
-
-    playerY=e.touches[0].clientY-rect.top;
-
+    const rect = game.getBoundingClientRect();
+    playerY = e.touches[0].clientY - rect.top;
 });
 
-game.addEventListener("mousemove",(e)=>{
-    if(e.buttons===1){
-        const rect=game.getBoundingClientRect();
-        playerY=e.clientY-rect.top;
+// Mouse drag
+game.addEventListener("mousemove", e => {
+    if (e.buttons === 1) {
+        const rect = game.getBoundingClientRect();
+        playerY = e.clientY - rect.top;
     }
 });
 
-function spawnAsteroid(){
+function spawnAsteroid() {
 
-    if(!running) return;
+    if (!running) return;
 
-    const asteroid=document.createElement("div");
+    const asteroid = document.createElement("div");
+    asteroid.className = "asteroid";
+    asteroid.innerHTML = "☄️";
 
-    asteroid.className="asteroid";
-    asteroid.innerHTML="☄️";
+    asteroid.x = game.clientWidth;
+    asteroid.y = Math.random() * (game.clientHeight - 40);
 
-    asteroid.x=game.clientWidth;
-    asteroid.y=Math.random()*(game.clientHeight-40);
-    asteroid.speed=4+Math.random()*5;
+    // Speed increases over time
+    asteroid.speed = asteroidSpeed + Math.random() * 3;
 
-    asteroid.style.left=asteroid.x+"px";
-    asteroid.style.top=asteroid.y+"px";
+    asteroid.style.left = asteroid.x + "px";
+    asteroid.style.top = asteroid.y + "px";
 
     game.appendChild(asteroid);
-
     asteroids.push(asteroid);
+}
+
+function startSpawner() {
+
+    clearInterval(spawnTimer);
+
+    spawnTimer = setInterval(() => {
+        spawnAsteroid();
+    }, spawnRate);
 
 }
 
-setInterval(spawnAsteroid,700);
+startSpawner();
 
-function update(){
+function update() {
 
-    if(running){
+    if (running) {
 
-        if(keys["ArrowUp"]||keys["w"]||keys["W"]){
-            playerY-=6;
+        if (keys["ArrowUp"] || keys["w"] || keys["W"])
+            playerY -= 7;
+
+        if (keys["ArrowDown"] || keys["s"] || keys["S"])
+            playerY += 7;
+
+        playerY = Math.max(20, Math.min(game.clientHeight - 50, playerY));
+
+        player.style.top = playerY + "px";
+
+        // Increase difficulty
+        asteroidSpeed = 4 + Math.floor(score / 500);
+
+        let newRate = Math.max(250, 900 - Math.floor(score / 20));
+
+        if (newRate !== spawnRate) {
+            spawnRate = newRate;
+            startSpawner();
         }
 
-        if(keys["ArrowDown"]||keys["s"]||keys["S"]){
-            playerY+=6;
-        }
+        for (let i = asteroids.length - 1; i >= 0; i--) {
 
-        playerY=Math.max(20,Math.min(game.clientHeight-50,playerY));
+            const a = asteroids[i];
 
-        player.style.top=playerY+"px";
+            a.x -= a.speed;
 
-        for(let i=asteroids.length-1;i>=0;i--){
+            a.style.left = a.x + "px";
 
-            const a=asteroids[i];
+            // Collision
+            if (
+                a.x < 95 &&
+                a.x > 10 &&
+                a.y < playerY + 35 &&
+                a.y + 35 > playerY
+            ) {
 
-            a.x-=a.speed;
-
-            a.style.left=a.x+"px";
-
-            if(
-                a.x<95 &&
-                a.x>10 &&
-                a.y<playerY+35 &&
-                a.y+35>playerY
-            ){
-
-                running=false;
-                gameOver.style.display="flex";
-
+                running = false;
+                clearInterval(spawnTimer);
+                gameOver.style.display = "flex";
             }
 
-            if(a.x<-60){
-
+            if (a.x < -60) {
                 a.remove();
-                asteroids.splice(i,1);
-
+                asteroids.splice(i, 1);
             }
-
         }
 
         score++;
 
-        scoreText.innerHTML="Score: "+score;
+        scoreText.innerHTML =
+            "Score: " + score +
+            "<br>Speed: " + asteroidSpeed;
 
     }
 
     requestAnimationFrame(update);
-
 }
 
 update();
 
-restartBtn.onclick=function(){
+restartBtn.onclick = function () {
 
-    asteroids.forEach(a=>a.remove());
+    asteroids.forEach(a => a.remove());
 
-    asteroids=[];
+    asteroids = [];
 
-    playerY=game.clientHeight/2;
+    playerY = game.clientHeight / 2;
 
-    score=0;
+    score = 0;
 
-    running=true;
+    asteroidSpeed = 4;
 
-    scoreText.innerHTML="Score: 0";
+    spawnRate = 900;
+    running = true;
 
-    gameOver.style.display="none";
+    scoreText.innerHTML = "Score: 0";
+
+    gameOver.style.display = "none";
+
+    startSpawner();
 
 };
