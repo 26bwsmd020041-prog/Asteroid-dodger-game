@@ -45,6 +45,7 @@ game.addEventListener("mousemove", e => {
 function spawnAsteroid() {
 
     if (!running) return;
+    if (game.clientWidth === 0 || game.clientHeight === 0) return;
 
     const asteroid = document.createElement("div");
     asteroid.className = "asteroid";
@@ -53,7 +54,6 @@ function spawnAsteroid() {
     asteroid.x = game.clientWidth;
     asteroid.y = Math.random() * (game.clientHeight - 40);
 
-    // Speed increases over time
     asteroid.speed = asteroidSpeed + Math.random() * 3;
 
     asteroid.style.left = asteroid.x + "px";
@@ -62,17 +62,6 @@ function spawnAsteroid() {
     game.appendChild(asteroid);
     asteroids.push(asteroid);
 }
-
-function startSpawner() {
-
-    clearInterval(spawnTimer);
-
-    spawnTimer = setInterval(() => {
-        spawnAsteroid();
-    }, spawnRate);
-
-}
-
 startSpawner();
 
 function update() {
