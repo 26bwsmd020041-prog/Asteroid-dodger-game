@@ -70,3 +70,9 @@ body{
     border-radius:12px;
     cursor:pointer;
 }
+
+.asteroid{
+    position:absolute;
+    font-size:40px;
+    z-index:20;
+}
