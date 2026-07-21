@@ -7,58 +7,81 @@ const restartBtn = document.getElementById("restartBtn");
 let playerY = 0;
 let asteroids = [];
 let score = 0;
-let running = true;
+let running = false;
 
-// Start player in the middle
-function startGame() {
-    playerY = game.clientHeight / 2;
-    player.style.top = playerY + "px";
-
-    score = 0;
-    scoreText.textContent = "Score: 0";
+function resetGame() {
 
     asteroids.forEach(a => a.remove());
     asteroids = [];
 
+    score = 0;
+    scoreText.textContent = "Score: 0";
+
+    playerY = game.clientHeight / 2;
+    player.style.top = playerY + "px";
+
     gameOver.style.display = "none";
 
     running = true;
+
 }
 
-startGame();
+window.onload = function () {
 
-// Mouse control
+    resetGame();
+
+};
+
+// ---------- PLAYER ----------
+
+function movePlayer(y) {
+
+    playerY = y;
+
+    if (playerY < 30) playerY = 30;
+    if (playerY > game.clientHeight - 30)
+        playerY = game.clientHeight - 30;
+
+    player.style.top = playerY + "px";
+
+}
+
+// Mouse
 game.addEventListener("mousemove", e => {
+
     if (!running) return;
 
     const rect = game.getBoundingClientRect();
-    playerY = e.clientY - rect.top;
 
-    if (playerY < 25) playerY = 25;
-    if (playerY > game.clientHeight - 25)
-        playerY = game.clientHeight - 25;
+    movePlayer(e.clientY - rect.top);
 
-    player.style.top = playerY + "px";
 });
 
-// Touch control
+// Touch
+game.addEventListener("touchstart", e => {
+
+    if (!running) return;
+
+    const rect = game.getBoundingClientRect();
+
+    movePlayer(e.touches[0].clientY - rect.top);
+
+});
+
 game.addEventListener("touchmove", e => {
+
     if (!running) return;
 
     e.preventDefault();
 
     const rect = game.getBoundingClientRect();
-    playerY = e.touches[0].clientY - rect.top;
 
-    if (playerY < 25) playerY = 25;
-    if (playerY > game.clientHeight - 25)
-        playerY = game.clientHeight - 25;
-
-    player.style.top = playerY + "px";
+    movePlayer(e.touches[0].clientY - rect.top);
 
 }, { passive: false });
 
-// Spawn asteroids
+// ---------- SPAWN ASTEROIDS ----------
+
 setInterval(() => {
 
     if (!running) return;
@@ -70,7 +93,7 @@ setInterval(() => {
 
     asteroid.x = game.clientWidth;
     asteroid.y = Math.random() * (game.clientHeight - 50);
-    asteroid.speed = 5 + Math.random() * 4;
+    asteroid.speed = 6 + Math.random() * 3;
 
     asteroid.style.left = asteroid.x + "px";
     asteroid.style.top = asteroid.y + "px";
@@ -79,9 +102,10 @@ setInterval(() => {
 
     asteroids.push(asteroid);
 
-}, 800);
+}, 700);
 
-// Main game loop
+// ---------- GAME LOOP ----------
+
 function loop() {
 
     if (running) {
@@ -94,29 +118,38 @@ function loop() {
             let a = asteroids[i];
 
             a.x -= a.speed;
+
             a.style.left = a.x + "px";
 
             // Collision
             if (
-                a.x < 80 &&
+                a.x < 90 &&
                 Math.abs(a.y - playerY) < 40
             ) {
+
                 running = false;
+
                 gameOver.style.display = "flex";
+
             }
 
-            // Remove off-screen
+            // Remove
             if (a.x < -60) {
+
                 a.remove();
                 asteroids.splice(i, 1);
+
             }
+
         }
+
     }
 
     requestAnimationFrame(loop);
+
 }
 
 loop();
 
 // Restart
-restartBtn.onclick = startGame;
+restartBtn.onclick = resetGame;
